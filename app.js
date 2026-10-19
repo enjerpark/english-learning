@@ -77,7 +77,14 @@ function gameStart() {
   const grid = $('matchGrid');
   if (!grid) return;
   const pool = allWords().filter((v) => v.w.length <= 12);
-  const picked = pool.sort(() => Math.random() - 0.5).slice(0, game.total);
+  // 洗牌后挑选 8 个，同时保证中文释义不重复（避免两张相同中文卡造成混淆）
+  const shuffled = pool.sort(() => Math.random() - 0.5);
+  const seenZh = new Set();
+  const picked = [];
+  for (const v of shuffled) {
+    if (picked.length >= game.total) break;
+    if (!seenZh.has(v.zh)) { seenZh.add(v.zh); picked.push(v); }
+  }
   const cards = [];
   picked.forEach((v) => { cards.push({ t: v.w, k: v.w }); cards.push({ t: v.zh, k: v.w }); });
   cards.sort(() => Math.random() - 0.5);

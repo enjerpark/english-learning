@@ -71,60 +71,6 @@ function dictSearch() {
   });
 }
 
-/* ---------- 单词记忆配对游戏 ---------- */
-const game = { first: null, lock: false, matched: 0, tries: 0, total: 8 };
-function gameStart() {
-  const grid = $('matchGrid');
-  if (!grid) return;
-  const pool = allWords().filter((v) => v.w.length <= 12);
-  // 洗牌后挑选 8 个，同时保证中文释义不重复（避免两张相同中文卡造成混淆）
-  const shuffled = pool.sort(() => Math.random() - 0.5);
-  const seenZh = new Set();
-  const picked = [];
-  for (const v of shuffled) {
-    if (picked.length >= game.total) break;
-    if (!seenZh.has(v.zh)) { seenZh.add(v.zh); picked.push(v); }
-  }
-  const cards = [];
-  picked.forEach((v) => { cards.push({ t: v.w, k: v.w }); cards.push({ t: v.zh, k: v.w }); });
-  cards.sort(() => Math.random() - 0.5);
-  game.first = null; game.lock = false; game.matched = 0; game.tries = 0;
-  $('gameScore').textContent = '0';
-  $('gameTries').textContent = '0';
-  grid.innerHTML = cards.map((c, i) =>
-    `<div class="mcard" data-k="${c.k}" data-i="${i}">?</div>`).join('');
-  grid.querySelectorAll('.mcard').forEach((el) => {
-    el.addEventListener('click', () => gameFlip(el, cards[+el.dataset.i].t));
-  });
-}
-function gameFlip(el, text) {
-  if (game.lock || el.classList.contains('open') || el.classList.contains('done')) return;
-  el.textContent = text;
-  el.classList.add('open');
-  if (!game.first) { game.first = el; return; }
-  game.tries++;
-  $('gameTries').textContent = game.tries;
-  if (game.first.dataset.k === el.dataset.k) {
-    game.first.classList.add('done'); el.classList.add('done');
-    game.first.classList.remove('open'); el.classList.remove('open');
-    game.first = null;
-    game.matched++;
-    $('gameScore').textContent = game.matched;
-    if (game.matched === game.total) {
-      setTimeout(() => alert(`🎉 全部配对成功！共用了 ${game.tries} 次尝试，再来一局？`), 300);
-    }
-  } else {
-    game.lock = true;
-    const a = game.first, b = el;
-    game.first = null;
-    setTimeout(() => {
-      a.textContent = '?'; b.textContent = '?';
-      a.classList.remove('open'); b.classList.remove('open');
-      game.lock = false;
-    }, 700);
-  }
-}
-
 /* ---------- 学段详情页 ---------- */
 function renderStagePage() {
   const wrap = $('stageWrap');
@@ -142,28 +88,35 @@ function renderStagePage() {
   const docsHtml = d.docs.map((doc) =>
     `<div class="doc"><h3>${doc.title}</h3><p>${doc.body}</p></div>`).join('');
 
+  const vocab = d.vocab.concat((typeof VOCAB_EXTRA !== 'undefined' && VOCAB_EXTRA[meta.id]) || []);
   const vocabHtml = `
     <table class="vocab-table">
       <tr><th>单词</th><th>音标</th><th>词性</th><th>中文</th><th>例句</th></tr>
-      ${d.vocab.map((v) => `<tr><td class="w">${v.w}</td><td>${v.ph}</td><td>${v.pos}</td><td>${v.zh}</td><td>${v.ex}</td></tr>`).join('')}
+      ${vocab.map((v) => `<tr><td class="w">${v.w}</td><td>${v.ph}</td><td>${v.pos}</td><td>${v.zh}</td><td>${v.ex}</td></tr>`).join('')}
     </table>`;
 
+  const lq = L.questions.concat((typeof LISTEN_EXTRA !== 'undefined' && LISTEN_EXTRA[meta.audio]) || []);
+  lq.forEach((q, i) => { QUIZ_REG['l' + i] = q; });
   const listenHtml = `
     <div class="listen-box">
       <h3 style="margin-bottom:4px">${L.title}</h3>
       <p style="color:#64748b;font-size:14px">适用：${L.level} · 先盲听做题，再对照原文</p>
       <audio controls preload="none" src="${L.file}"></audio>
       <details class="transcript"><summary>查看听力原文</summary><p>${L.transcript.replace(/\n/g, '<br>')}</p></details>
-      <div style="margin-top:18px">${L.questions.map((q, i) => quizBlock(q, 'l' + i)).join('')}</div>
+      <div style="margin-top:18px">${lq.map((q, i) => quizBlock(q, 'l' + i)).join('')}</div>
     </div>`;
 
+  const quiz = d.quiz.concat((typeof QUIZ_EXTRA !== 'undefined' && QUIZ_EXTRA[meta.id]) || []);
+  quiz.forEach((q, i) => { QUIZ_REG['q' + i] = q; });
   const quizHtml = `
     <div class="quiz-box">
-      <h3 style="margin-bottom:14px">词汇语法小测（${d.quiz.length} 题）</h3>
-      ${d.quiz.map((q, i) => quizBlock(q, 'q' + i)).join('')}
-      <div class="quiz-score"><button class="btn" onclick="scoreQuiz('${meta.id}')">交卷看分</button>
+      <h3 style="margin-bottom:6px">词汇语法综合练习（${quiz.length} 题）</h3>
+      <p style="color:#64748b;font-size:13px;margin-bottom:14px">含选择题、判断题、填空题 · 答错自动记入错题本</p>
+      ${quiz.map((q, i) => quizBlock(q, 'q' + i)).join('')}
+      <div class="quiz-score"><button class="btn" onclick="scoreQuiz()">交卷看分</button>
       <p id="quizScore" style="margin-top:10px;font-weight:700"></p></div>
-    </div>`;
+    </div>
+    <div class="quiz-box" id="mistakeBox"></div>`;
 
   wrap.innerHTML = `
     <div class="tabs">
@@ -185,38 +138,100 @@ function renderStagePage() {
       $('p-' + t.dataset.t).classList.add('active');
     });
   });
-  bindQuiz(wrap);
+  bindQuiz(wrap, meta.id);
+  renderMistakes($('mistakeBox'), meta.id);
 }
 
+/* ---------- 习题：选择 / 判断 / 填空 + 错题本 ---------- */
+const QUIZ_REG = {};
 function quizBlock(q, key) {
-  return `<div class="q" data-a="${q.a}" data-key="${key}">
-    <div class="q-title">${q.q}</div>
-    <div class="q-opts">${q.options.map((o, i) =>
-      `<label><input type="radio" name="${key}" value="${i}"> ${o}</label>`).join('')}</div>
+  const type = q.t || 'c';
+  let body = '';
+  if (type === 'tf') {
+    body = `<div><button class="btn btn-ghost tf-btn" data-v="1">对 ✓</button><button class="btn btn-ghost tf-btn" data-v="0">错 ✗</button></div>`;
+  } else if (type === 'f') {
+    body = `<div class="q-fill"><input type="text" placeholder="输入答案后点检查" autocomplete="off"><button class="btn btn-small">检查</button></div>`;
+  } else {
+    body = `<div class="q-opts">${q.options.map((o, i) =>
+      `<label><input type="radio" name="${key}" value="${i}"> ${o}</label>`).join('')}</div>`;
+  }
+  const tag = type === 'tf' ? '判断' : type === 'f' ? '填空' : '选择';
+  return `<div class="q" data-key="${key}">
+    <div class="q-title"><span class="q-tag">${tag}</span>${q.q}</div>${body}
     <div class="q-feedback"></div>
   </div>`;
 }
-function bindQuiz(root) {
+function bindQuiz(root, stageId) {
   root.querySelectorAll('.q').forEach((box) => {
+    const q = QUIZ_REG[box.dataset.key];
+    if (!q) return;
     const fb = box.querySelector('.q-feedback');
-    box.querySelectorAll('input').forEach((inp) => {
-      inp.addEventListener('change', () => {
-        const ok = +inp.value === +box.dataset.a;
-        fb.className = 'q-feedback ' + (ok ? 'ok' : 'no');
-        fb.textContent = ok ? '✅ 答对了！' : '❌ 再想想，正确答案是：' + box.querySelectorAll('label')[+box.dataset.a].textContent.trim();
+    const mark = (ok, correctText) => {
+      box.dataset.ok = ok ? '1' : '0';
+      fb.className = 'q-feedback ' + (ok ? 'ok' : 'no');
+      fb.textContent = ok ? '✅ 答对了！' : '❌ 答错了，正确答案：' + correctText;
+      if (!ok) {
+        saveMistake(stageId, q, correctText);
+        const mb = $('mistakeBox');
+        if (mb) renderMistakes(mb, stageId);
+      }
+    };
+    if (q.t === 'tf') {
+      box.querySelectorAll('.tf-btn').forEach((btn) =>
+        btn.addEventListener('click', () => mark((btn.dataset.v === '1') === !!q.a, q.a ? '对' : '错')));
+    } else if (q.t === 'f') {
+      const inp = box.querySelector('input'), btn = box.querySelector('button');
+      btn.addEventListener('click', () => {
+        const v = inp.value.trim().toLowerCase();
+        mark((q.a || []).some((a) => String(a).toLowerCase() === v), (q.a || []).join(' / '));
       });
-    });
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') btn.click(); });
+    } else {
+      box.querySelectorAll('input').forEach((inp) =>
+        inp.addEventListener('change', () => mark(+inp.value === +q.a, q.options[q.a])));
+    }
   });
 }
-function scoreQuiz(levelId) {
-  const d = LEVEL_DATA[levelId];
-  let score = 0;
-  document.querySelectorAll('#p-quiz .q').forEach((box) => {
-    const sel = box.querySelector('input:checked');
-    if (sel && +sel.value === +box.dataset.a) score++;
+function scoreQuiz() {
+  const boxes = document.querySelectorAll('#p-quiz .q');
+  let done = 0, score = 0;
+  boxes.forEach((b) => {
+    if (b.dataset.ok === '1' || b.dataset.ok === '0') { done++; if (b.dataset.ok === '1') score++; }
   });
   const el = $('quizScore');
-  el.textContent = `得分：${score} / ${d.quiz.length}` + (score === d.quiz.length ? ' 🎉 满分！' : score >= 3 ? ' 👍 不错，继续加油！' : ' 💪 多看看词汇表再来一次吧！');
+  const total = boxes.length;
+  el.textContent = done < total
+    ? `已作答 ${done} / ${total} 题，得分 ${score} 分（还有 ${total - done} 题没做）`
+    : `得分：${score} / ${total}` + (score === total ? ' 🎉 满分！' : score / total >= 0.6 ? ' 👍 不错，继续加油！' : ' 💪 错题已记入错题本，复习后再来！');
+}
+/* ---------- 错题本（localStorage） ---------- */
+function saveMistake(stageId, q, correctText) {
+  try {
+    const k = 'eh_mistakes';
+    const arr = JSON.parse(localStorage.getItem(k) || '[]');
+    if (!arr.some((m) => m.stage === stageId && m.q === q.q)) {
+      arr.push({ stage: stageId, q: q.q, c: correctText });
+      localStorage.setItem(k, JSON.stringify(arr.slice(-200)));
+    }
+  } catch (e) {}
+}
+function renderMistakes(box, stageId) {
+  if (!box) return;
+  let arr = [];
+  try { arr = JSON.parse(localStorage.getItem('eh_mistakes') || '[]').filter((m) => m.stage === stageId); } catch (e) {}
+  box.innerHTML = `<h3 style="margin-bottom:10px">📝 我的错题本（${arr.length}）</h3>` +
+    (arr.length
+      ? arr.map((m) => `<div class="dict-item"><div>${m.q}</div><div style="color:#16a34a;font-size:14px">正确答案：${m.c}</div></div>`).join('') +
+        '<button class="btn btn-ghost btn-small" id="clearMistakes" style="margin-top:12px">清空错题本</button>'
+      : '<p class="dict-hint">还没有错题，答错的题目会自动收录到这里，方便集中复习。</p>');
+  const c = $('clearMistakes');
+  if (c) c.addEventListener('click', () => {
+    try {
+      const all = JSON.parse(localStorage.getItem('eh_mistakes') || '[]').filter((m) => m.stage !== stageId);
+      localStorage.setItem('eh_mistakes', JSON.stringify(all));
+    } catch (e) {}
+    renderMistakes(box, stageId);
+  });
 }
 
 /* ---------- 杂志页 ---------- */
@@ -261,9 +276,5 @@ document.addEventListener('DOMContentLoaded', () => {
     $('dictInput').addEventListener('input', dictSearch);
     $('dictBtn').addEventListener('click', dictSearch);
     dictSearch();
-  }
-  if ($('matchGrid')) {
-    $('gameRestart').addEventListener('click', gameStart);
-    gameStart();
   }
 });

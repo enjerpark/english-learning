@@ -228,11 +228,28 @@ function renderMagazine() {
     </article>`).join('');
 }
 
+/* ---------- 杂志页：第 2 期 ---------- */
+function renderMagazine2() {
+  const wrap = $('magWrap2');
+  if (!wrap) return;
+  $('magCover2').innerHTML = `<h1>📖 English Weekly</h1><div class="issue">${MAGAZINE2.issue}</div>
+    <p style="color:#64748b;margin-top:10px">每月一期：阅读 · 科普 · 文化，配生词表</p>`;
+  wrap.innerHTML = MAGAZINE2.articles.map((a) => `
+    <article class="article">
+      <div class="cat">${a.cat}</div>
+      <h2>${a.title}</h2>
+      <p class="body-en">${a.en}</p>
+      <p class="body-zh">${a.zh}</p>
+    <div class="wordlist"><b>生词表：</b>${a.words.map((w) => ` ${w[0]}（${w[1]}）`).join('；')}</div>
+    </article>`).join('');
+}
+
 /* ---------- 初始化 ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   renderStages();
   renderStagePage();
   renderMagazine();
+  renderMagazine2();
   if ($('dictInput')) {
     $('dictInput').addEventListener('input', dictSearch);
     $('dictBtn').addEventListener('click', dictSearch);

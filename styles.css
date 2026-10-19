@@ -171,6 +171,9 @@ body {
 
 footer { text-align: center; color: var(--muted); font-size: 13px; padding: 60px 24px 36px; }
 .back { display: inline-block; margin: 18px 24px 0; color: var(--primary); text-decoration: none; font-size: 14px; }
+.issue-nav { display: flex; gap: 10px; justify-content: center; margin: 16px 24px 0; }
+.issue-nav a { padding: 6px 18px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); text-decoration: none; font-size: 14px; background: var(--card); }
+.issue-nav a.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
 
 @media (max-width: 720px) {
   .nav-links { display: none; }

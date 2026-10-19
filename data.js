@@ -428,3 +428,31 @@ const MAGAZINE = {
     },
   ],
 };
+
+/* ---------- 英语杂志：第 2 期 ---------- */
+const MAGAZINE2 = {
+  issue: '第 2 期 · 2026 年 11 月',
+  articles: [
+    {
+      cat: 'READING · 阅读',
+      title: 'A Rainy Day at Home',
+      en: 'It rained all day on Saturday, so I stayed at home. In the morning, I read my favorite comic book on the sofa. The rain hit the window and made a soft sound. It felt warm and safe inside. At noon, Mom made hot noodles for lunch. The steam rose from the bowl and warmed my face. In the afternoon, Dad and I played chess. He won the first game, but I won the second one! In the evening, the rain stopped, and a rainbow appeared in the sky. It was the most beautiful rainbow I had ever seen. A rainy day at home can be wonderful, too.',
+      zh: '周六下了一整天的雨，所以我待在家里。早上，我躺在沙发上看最喜欢的漫画书。雨点打在窗户上，发出轻柔的声响。屋里温暖又安心。中午，妈妈做了热腾腾的面条。热气从碗里升起来，暖了我的脸。下午，我和爸爸下象棋。他赢了第一局，但我赢了第二局！傍晚，雨停了，天空出现了一道彩虹。那是我见过的最美的彩虹。在家的雨天，也可以很美好。',
+      words: [['comic', 'n. 漫画'], ['steam', 'n. 蒸汽；热气'], ['chess', 'n. 象棋；国际象棋'], ['rainbow', 'n. 彩虹']],
+    },
+    {
+      cat: 'SCIENCE · 科普',
+      title: 'Why Is the Sky Blue?',
+      en: 'Have you ever wondered why the sky is blue? The answer is in the sunlight. Sunlight looks white, but it is actually made of many colors. When sunlight reaches the Earth, it hits tiny particles in the air. Blue light is scattered in all directions more than other colors. That is why the sky looks blue to our eyes. At sunset, the light travels a longer way through the air, and most of the blue light is scattered away. What is left is red and orange — that is why sunsets are so colorful!',
+      zh: '你有没有想过，天空为什么是蓝色的？答案藏在阳光里。阳光看起来是白色的，但实际上由许多颜色组成。当阳光到达地球，会撞上空气中微小的颗粒。蓝光比其他颜色更容易向四面八方散射。这就是为什么天空在我们眼中是蓝色的。日落时，阳光要穿过更厚的空气，大部分蓝光都被散射掉了，剩下的是红色和橙色——这就是晚霞如此绚烂的原因！',
+      words: [['particle', 'n. 颗粒；粒子'], ['scatter', 'v. 散射'], ['sunset', 'n. 日落'], ['colorful', 'adj. 绚丽多彩的']],
+    },
+    {
+      cat: 'CULTURE · 文化',
+      title: "Paper: China's Gift to the World",
+      en: 'Long ago, people wrote on bamboo strips and silk. They were heavy and expensive. About 2,000 years ago, a Chinese man named Cai Lun found a better way. He made paper from tree bark, old cloth, and fishing nets. His paper was light, cheap, and easy to carry. Soon, paper spread across China and then to the whole world. Books, newspapers, and letters all became possible because of paper. Today we use paper every day — for homework, for drawing, and for wrapping gifts. One simple invention changed how humans share knowledge forever.',
+      zh: '很久以前，人们在竹简和丝绸上写字，又重又贵。约两千年前，一位名叫蔡伦的中国人找到了更好的办法。他用树皮、破布和渔网造出了纸。他的纸又轻又便宜，还便于携带。很快，纸传遍中国，又走向全世界。书、报纸和信件都因为纸而成为可能。今天我们每天都在用纸——写作业、画画、包装礼物。一项简单的发明，永远改变了人类分享知识的方式。',
+      words: [['bamboo', 'n. 竹子'], ['silk', 'n. 丝绸'], ['spread', 'v. 传播'], ['invention', 'n. 发明']],
+    },
+  ],
+};

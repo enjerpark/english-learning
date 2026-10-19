@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语学习站 English Hub · 从幼儿到雅思托福</title>
+<meta name="description" content="覆盖幼儿、小学、初中、高中、大学、四六级、雅思、托福的英语学习站：学习文档、核心词汇、在线词典、听力音频、习题练习、英语杂志、教学PPT、单词游戏。">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="logo" href="index.html">English Hub<small>英语学习站</small></a>
+  <div class="nav-links">
+    <a href="#stages">学段</a>
+    <a href="#dict">词典</a>
+    <a href="#game">游戏</a>
+    <a href="magazine.html">杂志</a>
+    <a href="#ppt">PPT</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <p class="hero-kicker">ENGLISH FOR EVERYONE</p>
+  <h1>从 ABC 到雅思托福，<em>一站学完。</em></h1>
+  <p>幼儿启蒙 · 小学 · 初中 · 高中 · 大学 · 四六级 · 雅思 · 托福<br>文档、词汇、听力、习题、杂志、游戏，全都有。</p>
+  <div class="hero-tags">
+    <span>📄 学习文档</span><span>📖 核心词汇</span><span>📘 在线词典</span>
+    <span>🎧 听力音频</span><span>✍️ 习题练习</span><span>🎮 单词游戏</span>
+  </div>
+</header>
+
+<main>
+  <!-- 学段 -->
+  <section id="stages" class="section">
+    <p class="kicker">CHOOSE YOUR LEVEL</p>
+    <h2>选择你的学段</h2>
+    <p class="section-sub">每个学段都有学习文档、核心词汇表、听力练习和配套习题。</p>
+    <div class="stage-grid" id="stageGrid"></div>
+  </section>
+
+  <!-- 词典 -->
+  <section id="dict" class="section">
+    <p class="kicker">DICTIONARY</p>
+    <h2>在线词典</h2>
+    <p class="section-sub">内置核心词库，输入即查：音标、词性、释义、例句。</p>
+    <div class="dict-box">
+      <div class="dict-search">
+        <input id="dictInput" type="text" placeholder="输入英文或中文，如 apple / 苹果">
+        <button class="btn" id="dictBtn">查词</button>
+      </div>
+      <div class="dict-result" id="dictResult"></div>
+    </div>
+  </section>
+
+  <!-- 游戏 -->
+  <section id="game" class="section">
+    <p class="kicker">WORD GAME</p>
+    <h2>单词记忆配对</h2>
+    <p class="section-sub">翻开卡片，把英文和中文配成对。配对全部完成即胜利！</p>
+    <div class="game-box">
+      <div class="game-head">
+        <div class="game-stats"><span>已配对 <b id="gameScore">0</b> / 8</span><span>尝试 <b id="gameTries">0</b> 次</span></div>
+        <button class="btn btn-ghost" id="gameRestart">🔄 重新开始</button>
+      </div>
+      <div class="match-grid" id="matchGrid"></div>
+    </div>
+  </section>
+
+  <!-- 杂志 -->
+  <section class="section">
+    <p class="kicker">MAGAZINE</p>
+    <h2>英语杂志</h2>
+    <p class="section-sub">English Weekly：每月一期，阅读、科普、文化短文，配生词表和中文翻译。</p>
+    <div class="res-grid">
+      <div class="res-card">
+        <div class="icon">📖</div>
+        <h3>English Weekly · 第 1 期</h3>
+        <p>《乡下的周末》《我们为什么做梦？》《茶：五千年的饮品》，中英双语+生词表。</p>
+        <a class="btn" href="magazine.html">开始阅读</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PPT -->
+  <section id="ppt" class="section">
+    <p class="kicker">TEACHING PPT</p>
+    <h2>英语教学 PPT</h2>
+    <p class="section-sub">老师家长直接下载可用，课堂、家教、培训都适用。</p>
+    <div class="res-grid">
+      <div class="res-card">
+        <div class="icon">🎨</div>
+        <h3>小学词汇课：颜色与动物</h3>
+        <p>8 页课件：学习目标、颜色词、动物词、课堂小游戏、练习与作业。</p>
+        <a class="btn" href="assets/ppt/primary-colors-animals.pptx" download>下载 PPT</a>
+      </div>
+      <div class="res-card">
+        <div class="icon">📐</div>
+        <h3>初中语法课：现在进行时</h3>
+        <p>8 页课件：结构讲解、时间标志词、易错点、课堂练习与答案。</p>
+        <a class="btn" href="assets/ppt/junior-present-continuous.pptx" download>下载 PPT</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>© 2026 English Hub 英语学习站 · 学英语，从这里开始</p>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

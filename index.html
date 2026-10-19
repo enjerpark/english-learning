@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>英语学习站 English Hub · 从幼儿到雅思托福</title>
 <meta name="description" content="覆盖幼儿、小学、初中、高中、大学、四六级、雅思、托福的英语学习站：学习文档、核心词汇、在线词典、听力音频、习题练习、英语杂志、教学PPT、单词游戏。">
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 
@@ -16,6 +16,8 @@
     <a href="#dict">词典</a>
     
     <a href="magazine.html">杂志</a>
+    <a href="#progress">打卡</a>
+    <a href="#wordbook">生词本</a>
     <a href="#ppt">PPT</a>
   </div>
 </nav>
@@ -29,6 +31,16 @@
     <span>🎧 听力音频</span><span>✍️ 习题练习</span><span>📝 错题本</span>
   </div>
 </header>
+<!-- 每日一句 -->
+<section class="section" id="daily" style="padding-top:36px">
+  <div class="daily-banner">
+    <p class="daily-kicker">DAILY SENTENCE · 每日一句</p>
+    <p class="daily-en" id="dailyEn"></p>
+    <p class="daily-zh" id="dailyZh"></p>
+    <button class="btn btn-light btn-small" id="dailySpeak">🔊 朗读</button>
+  </div>
+</section>
+
 
 <main>
   <!-- 学段 -->
@@ -38,6 +50,29 @@
     <p class="section-sub">每个学段都有学习文档、核心词汇表、听力练习和配套习题。</p>
     <div class="stage-grid" id="stageGrid"></div>
   </section>
+
+  
+<!-- 数据看板 + 打卡 -->
+<section class="section" id="progress">
+  <p class="kicker">MY PROGRESS</p>
+  <h2>学习数据</h2>
+  <p class="section-sub">打卡、答题、收藏，点点滴滴都算数。</p>
+  <div class="stat-grid">
+    <div class="stat-card"><b id="stAnswered">0</b><span>累计答题</span></div>
+    <div class="stat-card"><b id="stAcc">–</b><span>正确率</span></div>
+    <div class="stat-card"><b id="stStreak">0</b><span>连续打卡（天）</span></div>
+    <div class="stat-card"><b id="stWords">0</b><span>生词本</span></div>
+    <div class="stat-card"><b id="stMistakes">0</b><span>错题本</span></div>
+  </div>
+  <div class="checkin-box">
+    <div style="flex:1;min-width:240px">
+      <h3>📅 学习打卡</h3>
+      <p style="color:var(--muted);font-size:14px;margin:4px 0 10px">每天打一次卡，坚持就是胜利。</p>
+      <div class="cal" id="checkinCal"></div>
+    </div>
+    <button class="btn" id="checkinBtn">今日打卡</button>
+  </div>
+</section>
 
   <!-- 词典 -->
   <section id="dict" class="section">
@@ -52,6 +87,36 @@
       <div class="dict-result" id="dictResult"></div>
     </div>
   </section>
+
+  
+<!-- 生词本 -->
+<section class="section" id="wordbook">
+  <p class="kicker">MY WORDS</p>
+  <h2>我的生词本</h2>
+  <p class="section-sub">在各学段词汇表点 ➕ 收藏单词，点 🔊 听发音，随时回来翻卡复习。</p>
+  <div class="dict-box">
+    <div id="wbMain">
+      <div id="wbList"></div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="wbReviewBtn">开始复习</button>
+        <button class="btn btn-ghost" id="wbClearBtn">清空生词本</button>
+      </div>
+    </div>
+    <div id="wbReview" style="display:none">
+      <div class="flashcard">
+        <div class="fc-word" id="fcWord"></div>
+        <div style="margin:10px 0"><button class="btn btn-ghost btn-small" id="fcSpeak">🔊 发音</button></div>
+        <div class="fc-zh" id="fcZh" style="visibility:hidden"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+        <button class="btn btn-ghost" id="fcShow">显示释义</button>
+        <button class="btn" id="fcKnow">记住了 →</button>
+        <button class="btn btn-ghost" id="fcExit">退出复习</button>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:10px" id="fcProg"></p>
+    </div>
+  </div>
+</section>
 
   <!-- 杂志 -->
   <section class="section">
@@ -101,7 +166,7 @@
 </footer>
 
 <script src="data.js?v=2"></script>
-<script src="data2.js?v=1"></script>
-<script src="app.js?v=3"></script>
+<script src="data2.js?v=2"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

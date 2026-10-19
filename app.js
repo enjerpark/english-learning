@@ -14,7 +14,7 @@ function renderStages() {
     </a>`).join('');
 }
 
-/* ---------- 在线词典（内置核心词库） ---------- */
+/* ---------- 在线词典（1.4 万词大词库 + 精选词条） ---------- */
 function allWords() {
   const seen = new Set();
   const out = [];
@@ -25,22 +25,50 @@ function allWords() {
   });
   return out;
 }
+let DICT = null, dictLoading = null;
+function loadDict() {
+  if (DICT) return Promise.resolve(DICT);
+  if (dictLoading) return dictLoading;
+  dictLoading = fetch('assets/dict.json')
+    .then((r) => r.json())
+    .then((j) => { DICT = j; return j; })
+    .catch(() => { DICT = {}; return DICT; });
+  return dictLoading;
+}
 function dictSearch() {
   const box = $('dictResult');
   if (!box) return;
-  const q = $('dictInput').value.trim().toLowerCase();
-  if (!q) { box.innerHTML = '<p class="dict-hint">输入英文单词试试，比如 apple、improve、phenomenon</p>'; return; }
-  const hits = allWords().filter((v) => v.w.toLowerCase().includes(q) || v.zh.includes($('dictInput').value.trim()));
-  if (!hits.length) {
-    box.innerHTML = `<p class="dict-hint">内置词库暂未收录“${$('dictInput').value.trim()}”，换个词试试。完整词典可以用欧路词典、Merriam-Webster 等 App 查询。</p>`;
-    return;
-  }
-  box.innerHTML = hits.slice(0, 12).map((v) => `
-    <div class="dict-item">
-      <span class="w">${v.w}</span><span class="ph">${v.ph}</span><br>
-      <span class="pos">${v.pos}</span> ${v.zh}
-      <div class="ex">例：${v.ex}</div>
-    </div>`).join('');
+  const raw = $('dictInput').value.trim();
+  const q = raw.toLowerCase();
+  if (!q) { box.innerHTML = '<p class="dict-hint">14000+ 核心词汇，输入即查，比如 hello、apple、phenomenon、苹果</p>'; return; }
+  box.innerHTML = '<p class="dict-hint">查询中…</p>';
+  loadDict().then(() => {
+    const curated = allWords().filter((v) => v.w.toLowerCase().includes(q) || v.zh.includes(raw));
+    const seen = new Set(curated.map((v) => v.w.toLowerCase()));
+    const big = [];
+    const keys = Object.keys(DICT);
+    const push = (k) => { if (!seen.has(k)) { seen.add(k); big.push(k); } };
+    if (DICT[q]) push(q);                                    // 完全匹配优先
+    for (const k of keys) { if (big.length >= 12) break; if (k !== q && k.startsWith(q)) push(k); }
+    if (big.length < 6) {
+      for (const k of keys) { if (big.length >= 12) break; if (k !== q && !k.startsWith(q) && k.includes(q)) push(k); }
+    }
+    let html = curated.slice(0, 12).map((v) => `
+      <div class="dict-item">
+        <span class="w">${v.w}</span><span class="ph">${v.ph}</span><br>
+        <span class="pos">${v.pos}</span> ${v.zh}
+        <div class="ex">例：${v.ex}</div>
+      </div>`).join('');
+    html += big.map((k) => `
+      <div class="dict-item">
+        <span class="w">${k}</span><span class="ph">${DICT[k][0] ? '/' + DICT[k][0] + '/' : ''}</span><br>
+        ${DICT[k][1]}
+      </div>`).join('');
+    if (!html) {
+      html = `<p class="dict-hint">没有找到“${raw}”，检查一下拼写，或换个词试试。</p>`;
+    }
+    box.innerHTML = html;
+  });
 }
 
 /* ---------- 单词记忆配对游戏 ---------- */

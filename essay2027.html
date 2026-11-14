@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2027 作文押题特刊 · 英语学习站</title>
+<link rel="stylesheet" href="styles.css?v=3">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="logo" href="index.html">English Hub<small>英语学习站</small></a>
+  <div class="nav-links">
+    <a href="index.html#stages">学段</a>
+    <a href="index.html#dict">词典</a>
+    <a href="magazine.html">杂志</a>
+  </div>
+</nav>
+
+<a class="back" href="index.html">← 返回首页</a>
+<header class="mag-cover" id="essayCover"></header>
+
+<main id="essayWrap" style="padding: 20px 24px 40px;"></main>
+
+<footer>
+  <p>© 2026 English Hub 英语学习站 · 押题仅供参考，范文请结合课堂要求使用</p>
+</footer>
+
+<script src="data-essay2027.js?v=1"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const d = ESSAY2027;
+  document.getElementById('essayCover').innerHTML =
+    '<h1>✍️ 2027 作文押题特刊</h1><div class="issue">' + d.issue + '</div>' +
+    '<p style="color:#64748b;margin-top:10px">' + d.intro + '</p>';
+  document.getElementById('essayWrap').innerHTML = d.topics.map((t) => `
+    <article class="article">
+      <div class="cat">${t.cat}</div>
+      <h2>${t.title}</h2>
+      <p style="color:#475569;font-size:14px;margin:6px 0">${t.prompt}</p>
+      <p style="color:#16a34a;font-size:13px;margin:0 0 12px">${t.exams}</p>
+      <p class="body-en" style="white-space:pre-line">${t.en}</p>
+      <p class="body-zh" style="white-space:pre-line">${t.zh}</p>
+      <div class="wordlist"><b>核心词汇：</b>${t.words.map((w) => ` ${w[0]}（${w[1]}）`).join('；')}</div>
+      <div class="wordlist"><b>亮点句型：</b>${t.phrases.map((p) => ` “${p}”`).join('；')}</div>
+    </article>`).join('');
+});
+</script>
+</body>
+</html>

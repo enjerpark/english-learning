@@ -343,7 +343,7 @@ function speak(text, slow) {
     if (!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US';
+    u.lang = /[\u4e00-\u9fff]/.test(text) ? 'zh-CN' : 'en-US';
     u.rate = slow ? 0.72 : 0.95;
     speechSynthesis.speak(u);
   } catch (e) {}
@@ -541,6 +541,7 @@ function initHomeFeatures() {
   renderCheckin();
   renderWordbook();
   renderDashboard();
+  initTranslate();
 
   const cb = $('checkinBtn');
   if (cb) cb.addEventListener('click', () => {
@@ -571,4 +572,92 @@ function initHomeFeatures() {
   if ($('fcKnow')) $('fcKnow').addEventListener('click', () => { FC.i++; renderCard(); });
   if ($('fcExit')) $('fcExit').addEventListener('click', () => { renderWordbook(); });
   if ($('fcSpeak')) $('fcSpeak').addEventListener('click', () => { if (FC && FC.words[FC.i]) speak(FC.words[FC.i].w); });
+}
+
+/* ---------- 在线翻译：Google（美国）优先，失败自动切备用引擎 ---------- */
+let TR_LAST = null;
+async function fetchGoogleTr(text, from, to) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 6000);
+  try {
+    const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + from + '&tl=' + to + '&dt=t&q=' + encodeURIComponent(text);
+    const r = await fetch(url, { signal: ctrl.signal });
+    if (!r.ok) throw new Error('google bad status');
+    const j = await r.json();
+    const out = (j[0] || []).map((seg) => seg[0]).join('');
+    if (!out) throw new Error('google empty');
+    return out;
+  } finally { clearTimeout(timer); }
+}
+async function fetchBackupTr(text, from, to) {
+  const r = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=' + encodeURIComponent(from + '|' + to));
+  const j = await r.json();
+  const t = j && j.responseData && j.responseData.translatedText;
+  if (!t || /MYMEMORY WARNING/i.test(t)) throw new Error('backup quota');
+  return t;
+}
+function initTranslate() {
+  const inp = $('trInput');
+  if (!inp) return;
+  const fromEl = $('trFrom'), toEl = $('trTo'), count = $('trCount');
+  const updDir = () => {
+    const cn = /[\u4e00-\u9fff]/.test(inp.value);
+    fromEl.textContent = cn ? '中文' : 'English';
+    toEl.textContent = cn ? 'English' : '中文';
+    count.textContent = inp.value.length + ' / 500';
+  };
+  inp.addEventListener('input', updDir);
+  updDir();
+  $('trClear').addEventListener('click', () => {
+    inp.value = ''; $('trResult').style.display = 'none'; TR_LAST = null; updDir(); inp.focus();
+  });
+  $('trSwap').addEventListener('click', () => {
+    if (TR_LAST) inp.value = TR_LAST.result;
+    $('trResult').style.display = 'none';
+    updDir();
+  });
+  $('trBtn').addEventListener('click', doTranslate);
+  $('trSpeak').addEventListener('click', () => { if (TR_LAST) speak(TR_LAST.result, TR_LAST.to === 'en'); });
+  $('trCopy').addEventListener('click', async () => {
+    if (!TR_LAST) return;
+    try { await navigator.clipboard.writeText(TR_LAST.result); toast('已复制'); }
+    catch (e) { toast('复制失败，长按译文手动复制'); }
+  });
+}
+async function doTranslate() {
+  const inp = $('trInput');
+  const text = inp.value.trim();
+  if (!text) { toast('先输入要翻译的句子'); return; }
+  const cn = /[\u4e00-\u9fff]/.test(text);
+  const from = cn ? 'zh-CN' : 'en';
+  const to = cn ? 'en' : 'zh-CN';
+  const box = $('trResult'), out = $('trText'), eng = $('trEngine'), btn = $('trBtn');
+  box.style.display = '';
+  out.textContent = '翻译中…';
+  eng.textContent = '';
+  const ck = 'eh_tr_' + from + '>' + to + '_' + text;
+  try {
+    const cached = localStorage.getItem(ck);
+    if (cached) {
+      const c = JSON.parse(cached);
+      TR_LAST = { result: c.r, to };
+      out.textContent = c.r;
+      eng.textContent = '翻译引擎：' + c.e + '（本地缓存）';
+      return;
+    }
+  } catch (e) {}
+  btn.disabled = true;
+  try {
+    let result, engine;
+    try { result = await fetchGoogleTr(text, from, to); engine = 'Google（美国接口）'; }
+    catch (e1) { result = await fetchBackupTr(text, from, to); engine = '备用引擎'; }
+    TR_LAST = { result, to };
+    out.textContent = result;
+    eng.textContent = '翻译引擎：' + engine;
+    try { localStorage.setItem(ck, JSON.stringify({ r: result, e: engine })); } catch (e) {}
+  } catch (e2) {
+    out.textContent = '翻译失败：网络不通，或今日免费额度已用完，稍后再试。';
+    eng.textContent = '';
+    TR_LAST = null;
+  } finally { btn.disabled = false; }
 }

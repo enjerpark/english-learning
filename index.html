@@ -90,6 +90,34 @@
   </section>
 
   
+<!-- 在线翻译 -->
+<section class="section" id="translate">
+  <p class="kicker">TRANSLATOR</p>
+  <h2>在线翻译</h2>
+  <p class="section-sub">整句翻译：输中文翻英文，输英文翻中文，自动识别方向。</p>
+  <div class="dict-box">
+    <div class="tr-bar">
+      <span id="trFrom">中文</span>
+      <button class="icon-btn" id="trSwap" title="交换方向">⇄</button>
+      <span id="trTo">English</span>
+    </div>
+    <textarea id="trInput" rows="3" maxlength="500" placeholder="输入要翻译的句子，比如：我想学好英语"></textarea>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center">
+      <button class="btn" id="trBtn">翻译</button>
+      <button class="btn btn-ghost" id="trClear">清空</button>
+      <span class="tr-count" id="trCount">0 / 500</span>
+    </div>
+    <div class="tr-result" id="trResult" style="display:none">
+      <p id="trText"></p>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-small" id="trSpeak">🔊 朗读</button>
+        <button class="btn btn-ghost btn-small" id="trCopy">📋 复制</button>
+      </div>
+      <p class="tr-engine" id="trEngine"></p>
+    </div>
+  </div>
+</section>
+
 <!-- 生词本 -->
 <section class="section" id="wordbook">
   <p class="kicker">MY WORDS</p>

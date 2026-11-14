@@ -35,12 +35,44 @@ function loadDict() {
     .catch(() => { DICT = {}; return DICT; });
   return dictLoading;
 }
+/* ---------- 中文反查索引（输中文查英文） ---------- */
+let REV = null;
+const CN_ALIAS = {
+  '科技': ['technology'], '科学技术': ['technology', 'science'],
+  '手机': ['mobile phone', 'cellphone', 'phone'],
+  '猫': ['cat'], '狗': ['dog'], '老师': ['teacher'],
+};
+function buildReverse() {
+  if (REV) return REV;
+  REV = {};
+  for (const k in DICT) {
+    const def = (DICT[k] && DICT[k][1]) || '';
+    def.replace(/\[[^\]]*\]/g, ' ').split(/[\s,，、;；/]+/).forEach((tok) => {
+      if (tok.length >= 2 && /[\u4e00-\u9fff]/.test(tok)) {
+        (REV[tok] = REV[tok] || []).push(k);
+      }
+    });
+  }
+  return REV;
+}
+function reverseSearch(raw) {
+  const rev = buildReverse();
+  const out = [];
+  const seen = new Set();
+  const push = (w) => { if (w && !seen.has(w) && DICT[w]) { seen.add(w); out.push(w); } };
+  (CN_ALIAS[raw] || []).forEach(push);
+  (rev[raw] || []).forEach(push);
+  if (out.length < 12) for (const seg in rev) { if (out.length >= 12) break; if (seg !== raw && seg.startsWith(raw)) rev[seg].forEach(push); }
+  if (out.length < 12) for (const seg in rev) { if (out.length >= 12) break; if (!seg.startsWith(raw) && seg.includes(raw)) rev[seg].forEach(push); }
+  return out;
+}
+
 function dictSearch() {
   const box = $('dictResult');
   if (!box) return;
   const raw = $('dictInput').value.trim();
   const q = raw.toLowerCase();
-  if (!q) { box.innerHTML = '<p class="dict-hint">14000+ 核心词汇，输入即查，比如 hello、apple、phenomenon、苹果</p>'; return; }
+  if (!q) { box.innerHTML = '<p class="dict-hint">14000+ 核心词汇，中英互查，比如 hello、apple、科技、环境、苹果</p>'; return; }
   box.innerHTML = '<p class="dict-hint">查询中…</p>';
   loadDict().then(() => {
     const curated = allWords().filter((v) => v.w.toLowerCase().includes(q) || v.zh.includes(raw));
@@ -48,10 +80,14 @@ function dictSearch() {
     const big = [];
     const keys = Object.keys(DICT);
     const push = (k) => { if (!seen.has(k)) { seen.add(k); big.push(k); } };
-    if (DICT[q]) push(q);                                    // 完全匹配优先
-    for (const k of keys) { if (big.length >= 12) break; if (k !== q && k.startsWith(q)) push(k); }
-    if (big.length < 6) {
-      for (const k of keys) { if (big.length >= 12) break; if (k !== q && !k.startsWith(q) && k.includes(q)) push(k); }
+    if (/[\u4e00-\u9fff]/.test(raw)) {
+      reverseSearch(raw).forEach(push);                  // 中文：反查英文
+    } else {
+      if (DICT[q]) push(q);                                // 英文：完全匹配优先
+      for (const k of keys) { if (big.length >= 12) break; if (k !== q && k.startsWith(q)) push(k); }
+      if (big.length < 6) {
+        for (const k of keys) { if (big.length >= 12) break; if (k !== q && !k.startsWith(q) && k.includes(q)) push(k); }
+      }
     }
     let html = curated.slice(0, 12).map((v) => `
       <div class="dict-item">
